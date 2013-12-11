@@ -5,7 +5,7 @@ require 'aws_config/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "aws_config"
-  spec.version       = AwsConfig::VERSION
+  spec.version       = AWSConfig::VERSION
   spec.authors       = ["Masato Ikeda"]
   spec.email         = ["masato.ikeda@gmail.com"]
   spec.description   = %q{TODO: Write a gem description}

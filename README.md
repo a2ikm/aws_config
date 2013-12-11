@@ -1,4 +1,4 @@
-# AwsConfig
+# AWSConfig
 
 TODO: Write a gem description
 

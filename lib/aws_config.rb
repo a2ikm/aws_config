@@ -1,5 +1,5 @@
 require "aws_config/version"
 
-module AwsConfig
+module AWSConfig
   # Your code goes here...
 end
