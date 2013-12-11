@@ -37,7 +37,24 @@ module AWSConfig
       end
 
       def build(tokens)
+        tokens = tokens.dup
+        profiles = {}
+        profile = nil
 
+        while values = tokens.shift
+          head = values.shift
+
+          case head
+          when :profile
+            profile = profiles[values[0]] ||= {}
+          when :key_value
+            if profile
+              profile[values[0]] = values[1]
+            end
+          end
+        end
+
+        profiles
       end
   end
 end
