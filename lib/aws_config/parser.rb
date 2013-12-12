@@ -30,6 +30,9 @@ module AWSConfig
           elsif s.scan(/#[^\n]*/)
           elsif s.scan(/\s+/)
           elsif s.scan(/\n+/)
+          else
+            s.scan(/./)
+            raise "Invalid token `#{s[0]}` as #{s.pos}"
           end
         end
 
