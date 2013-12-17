@@ -1,4 +1,5 @@
 require "strscan"
+require "aws_config/profile"
 
 module AWSConfig
   class Parser
@@ -7,7 +8,7 @@ module AWSConfig
     end
 
     def parse(string)
-      build(tokenize(string))
+      wrap(build(tokenize(string)))
     end
 
     private
@@ -58,6 +59,13 @@ module AWSConfig
         end
 
         profiles
+      end
+
+      def wrap(profiles)
+        profiles.inject({}) do |s, (name, properties)|
+          s[name] = Profile.new(name, properties)
+          s
+        end
       end
   end
 end

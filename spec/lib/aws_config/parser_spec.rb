@@ -111,4 +111,25 @@ aws_access_key_id=DefaultAccessKey01
       }) }
     end
   end
+
+  describe "#wrap" do
+    subject { described_class.new.send(:wrap, profiles) }
+
+    context "Single profile" do
+      let(:profiles) {
+        {
+          "default" => {
+            "aws_access_key_id"     => "DefaultAccessKey01",
+            "aws_secret_access_key" => "Default/Secret/Access/Key/02",
+            "region"                => "us-west-1"
+          }
+        }
+      }
+      it { should be_a Hash }
+      it { should have_key "default" }
+      it "should have AWSConfig::Profile as value" do
+        expect(subject["default"]).to be_a AWSConfig::Profile
+      end
+    end
+  end
 end
