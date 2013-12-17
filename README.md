@@ -1,6 +1,6 @@
 # AWSConfig
 
-TODO: Write a gem description
+AWSConfig is a parser for AWS_CONFIG_FILE used in [aws-cli](https://github.com/aws/aws-cli).
 
 ## Installation
 
@@ -18,9 +18,34 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+It parses `~/.aws/config` by default.
 
-## Contributing
+If you put a config file like:
+
+    [default]
+    aws_access_key_id=DefaultAccessKey01
+    aws_secret_access_key=Default/Secret/Access/Key/02
+    # Optional, to define default region for this profile.
+    region=us-west-1
+
+    [profile testing]
+    aws_access_key_id=TestingAccessKey03
+    aws_secret_access_key=Testing/Secret/Access/Key/04
+    region=us-west-2
+
+you can access it like:
+
+    require "aws_config"
+    
+    puts AWSConfig.default.aws_access_key_id    #=> DefaultAccessKey01
+    puts AWSConfig.default.region               #=> Default/Secret/Access/Key/02
+
+also you can do like hashes:
+
+    puts AWSConfig["default"]["aws_access_key_id"]  #=> DefaultAccessKey01
+    puts AWSConfig["default"]["region"]             #=> Default/Secret/Access/Key/02
+
+## Contributin
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)

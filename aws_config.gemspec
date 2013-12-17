@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = AWSConfig::VERSION
   spec.authors       = ["Masato Ikeda"]
   spec.email         = ["masato.ikeda@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
-  spec.homepage      = ""
+  spec.description   = %q{AWSConfig is a parser for AWS_CONFIG_FILE used in aws-cli.}
+  spec.summary       = %q{AWSConfig is a parser for AWS_CONFIG_FILE used in aws-cli.}
+  spec.homepage      = "https://github.com/a2ikm/aws_config"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
