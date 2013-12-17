@@ -35,4 +35,12 @@ describe AWSConfig::Profile do
   it "should raise exceptions if unknown entry is called via methods" do
     expect { subject.unknown_method }.to raise_error NoMethodError
   end
+
+  it "should return a hash for aws-sdk-ruby's configuration format" do
+    expect(subject.config_hash).to eq({
+      access_key_id:      "DefaultAccessKey01",
+      secret_access_key:  "Default/Secret/Access/Key/02",
+      region:             "us-west-1"
+    })
+  end
 end

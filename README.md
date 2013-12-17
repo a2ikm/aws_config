@@ -45,6 +45,10 @@ also you can do like hashes:
     puts AWSConfig["default"]["aws_access_key_id"]  #=> DefaultAccessKey01
     puts AWSConfig["default"]["region"]             #=> Default/Secret/Access/Key/02
 
+If you want to use with aws-sdk-ruby, you can configure like:
+
+    AWS.config(AWSConfig.default.config_hash)
+
 ## Contributing
 
 1. Fork it

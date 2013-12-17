@@ -32,5 +32,13 @@ module AWSConfig
         super
       end
     end
+
+    def config_hash
+      {
+        access_key_id:      entries["aws_access_key_id"],
+        secret_access_key:  entries["aws_secret_access_key"],
+        region:             entries["region"]
+      }
+    end
   end
 end
