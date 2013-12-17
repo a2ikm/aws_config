@@ -45,7 +45,7 @@ also you can do like hashes:
     puts AWSConfig["default"]["aws_access_key_id"]  #=> DefaultAccessKey01
     puts AWSConfig["default"]["region"]             #=> Default/Secret/Access/Key/02
 
-## Contributin
+## Contributing
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
