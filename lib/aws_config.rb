@@ -1,6 +1,7 @@
 require "aws_config/version"
 require "aws_config/parser"
+require "aws_config/store"
 
 module AWSConfig
-  # Your code goes here...
+  extend Store
 end
