@@ -2,7 +2,11 @@ module AWSConfig
   module Store
     def profiles
       @profiles ||= begin
-        Parser.parse(File.read(config_file))
+        if File.exists?(config_file)
+          Parser.parse(File.read(config_file))
+        else
+          Hash.new
+        end
       end
     end
 
