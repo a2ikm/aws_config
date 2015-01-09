@@ -23,8 +23,6 @@ module AWSConfig
               tokens << [:profile, "default"]
             elsif m = s[1].match(/profile\s+([^\s]+)$/)
               tokens << [:profile, m[1]]
-            else
-              raise "Invalid profile sectioning"
             end
           elsif s.scan(/([^\s=#]+)\s*=\s*([^\s#]+)/)
             tokens << [:key_value, s[1], s[2]]
