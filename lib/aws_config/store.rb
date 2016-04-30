@@ -1,9 +1,13 @@
+require 'aws_config/profile_resolver'
 module AWSConfig
   module Store
     def profiles
       @profiles ||= begin
         if File.exists?(config_file)
-          Parser.parse(File.read(config_file))
+          profile_resolver = ProfileResolver.new
+          profile_resolver.add Parser.parse(File.read(credentials_file), true)
+          profile_resolver.add Parser.parse(File.read(config_file))
+          profile_resolver.profiles
         else
           Hash.new
         end
@@ -16,6 +20,15 @@ module AWSConfig
 
     def config_file=(path)
       @config_file = path
+      @profiles = nil
+    end
+
+    def credentials_file
+      @credentials_file || ENV['AWS_SHARED_CREDENTIALS_FILE'] || File.join(ENV['HOME'], '.aws/credentials')
+    end
+
+    def credentials_file=(path)
+      @credentials_file = path
       @profiles = nil
     end
 

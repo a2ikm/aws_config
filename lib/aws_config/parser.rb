@@ -3,8 +3,12 @@ require "aws_config/profile"
 
 module AWSConfig
   class Parser
-    def self.parse(string)
-      new.parse(string)
+    attr_accessor :credential_file_mode
+
+    def self.parse(string, credential_file_mode = false)
+      parser = new
+      parser.credential_file_mode = credential_file_mode
+      parser.parse(string)
     end
 
     def parse(string)
@@ -12,7 +16,7 @@ module AWSConfig
     end
 
     private
-      
+
       def tokenize(string)
         s = StringScanner.new(string)
         tokens  = []
@@ -23,6 +27,8 @@ module AWSConfig
               tokens << [:profile, "default"]
             elsif m = s[1].match(/profile\s+([^\s]+)$/)
               tokens << [:profile, m[1]]
+            elsif credential_file_mode
+              tokens << [:profile, s[1]]
             end
           elsif s.scan(/([^\s=#]+)\s*=\s*([^\s#]+)/)
             tokens << [:key_value, s[1], s[2]]
