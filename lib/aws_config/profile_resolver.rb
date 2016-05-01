@@ -1,4 +1,4 @@
-require 'aws_config/profile'
+require "aws_config/profile"
 
 module AWSConfig
   class ProfileResolver
@@ -16,7 +16,7 @@ module AWSConfig
         else
           profiles[name] = profile
         end
-        resolve_source_profile(name, profile) if profile.has_key? 'source_profile'
+        resolve_source_profile(name, profile) if profile.has_key? "source_profile"
         provides_source_profile(name, profile)
       end
     end
@@ -26,7 +26,7 @@ module AWSConfig
     def resolve_source_profile(name, profile)
       source_profile = profile.source_profile
       if profiles.key? source_profile
-        profile['source_profile'] = profiles[source_profile]
+        profile["source_profile"] = profiles[source_profile]
       else
         (wanted_profiles[source_profile] ||= []) << name
       end
@@ -35,7 +35,7 @@ module AWSConfig
     def provides_source_profile(name, profile)
       return unless wanted_profiles.key? name
       wanted_profiles[name].each do |wanted_by|
-        profiles[wanted_by]['source_profile'] = profile
+        profiles[wanted_by]["source_profile"] = profile
       end
       wanted_profiles.delete name
     end

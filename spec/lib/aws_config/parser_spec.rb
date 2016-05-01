@@ -60,13 +60,13 @@ aws_access_key_id=DefaultAccessKey01
       end
     end
 
-    context 'in credential file mode' do
+    context "in credential file mode" do
       subject do
         sut = described_class.new
         sut.credential_file_mode = true
         sut.send(:tokenize, string)
       end
-      context 'with only the default profile' do
+      context "with only the default profile" do
         let(:string) do
           <<-EOC
             [default]
@@ -75,13 +75,13 @@ aws_access_key_id=DefaultAccessKey01
           EOC
         end
         it { should eq [
-          [:profile,    'default'],
-          [:key_value,  'aws_access_key_id',      'DefaultAccessKey01'],
-          [:key_value,  'aws_secret_access_key',  'Default/Secret/Access/Key/02'],
+          [:profile,    "default"],
+          [:key_value,  "aws_access_key_id",      "DefaultAccessKey01"],
+          [:key_value,  "aws_secret_access_key",  "Default/Secret/Access/Key/02"],
         ] }
       end
 
-      context 'with the default and named profiles' do
+      context "with the default and named profiles" do
         let(:string) do
           <<-EOC
             [default]
@@ -92,10 +92,10 @@ aws_access_key_id=DefaultAccessKey01
           EOC
         end
         it { should eq [
-          [:profile,    'default'],
-          [:key_value,  'aws_access_key_id',  'DefaultAccessKey01'],
-          [:profile,    'testing'],
-          [:key_value,  'aws_access_key_id',  'TestingAccessKey03'],
+          [:profile,    "default"],
+          [:key_value,  "aws_access_key_id",  "DefaultAccessKey01"],
+          [:profile,    "testing"],
+          [:key_value,  "aws_access_key_id",  "TestingAccessKey03"],
         ] }
       end
     end

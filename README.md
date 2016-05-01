@@ -68,7 +68,7 @@ also you can do like hashes:
 If your config contains chained profiles using the `source_profile` property,
 you can still access the source profiles properties from the top i.e
 ```ruby
-  require 'aws_config'
+  require "aws_config"
 
   puts AWSConfig.with_mfa.role_arn #=> arn:example:283671836
   puts AWSConfig.with_mfa.region   #=> ap-southeast-2

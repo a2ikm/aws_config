@@ -12,7 +12,7 @@ module AWSConfig
       if entries.has_key?(key)
         entries[key]
       elsif source_profile?
-        entries['source_profile'][key]
+        entries["source_profile"][key]
       else
         nil
       end
@@ -29,7 +29,7 @@ module AWSConfig
     end
 
     def source_profile?
-      entries.key?('source_profile') && entries['source_profile'].is_a?(Profile)
+      entries.key?("source_profile") && entries["source_profile"].is_a?(Profile)
     end
 
     def respond_to?(id, include_all = false)
@@ -40,8 +40,8 @@ module AWSConfig
       if has_key?(id)
         self[id]
       elsif source_profile?
-        if entries['source_profile'].respond_to?(id)
-          entries['source_profile'].send(id, args)
+        if entries["source_profile"].respond_to?(id)
+          entries["source_profile"].send(id, args)
         else
           super
         end

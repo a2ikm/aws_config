@@ -1,4 +1,4 @@
-require 'aws_config/profile_resolver'
+require "aws_config/profile_resolver"
 module AWSConfig
   module Store
     def profiles
@@ -24,7 +24,7 @@ module AWSConfig
     end
 
     def credentials_file
-      @credentials_file || ENV['AWS_SHARED_CREDENTIALS_FILE'] || File.join(ENV['HOME'], '.aws/credentials')
+      @credentials_file || ENV["AWS_SHARED_CREDENTIALS_FILE"] || File.join(ENV["HOME"], ".aws/credentials")
     end
 
     def credentials_file=(path)
