@@ -67,6 +67,7 @@ module AWSConfig
 
     def merge!(profile)
       entries.merge! profile.entries
+      self
     end
   end
 end
