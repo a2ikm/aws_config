@@ -1,10 +1,8 @@
 [default]
-aws_access_key_id=DefaultAccessKey01
-aws_secret_access_key=Default/Secret/Access/Key/02
 # Optional, to define default region for this profile.
 region=us-west-1
+source_profile=default
 
 [profile testing]
-aws_access_key_id=TestingAccessKey03
-aws_secret_access_key=Testing/Secret/Access/Key/04
 region=us-west-2
+source_profile=testing
