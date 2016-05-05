@@ -59,6 +59,46 @@ aws_access_key_id=DefaultAccessKey01
         ] }
       end
     end
+
+    context "in credential file mode" do
+      subject do
+        sut = described_class.new
+        sut.credential_file_mode = true
+        sut.send(:tokenize, string)
+      end
+      context "with only the default profile" do
+        let(:string) do
+          <<-EOC
+            [default]
+            aws_access_key_id=DefaultAccessKey01
+            aws_secret_access_key=Default/Secret/Access/Key/02
+          EOC
+        end
+        it { should eq [
+          [:profile,    "default"],
+          [:key_value,  "aws_access_key_id",      "DefaultAccessKey01"],
+          [:key_value,  "aws_secret_access_key",  "Default/Secret/Access/Key/02"],
+        ] }
+      end
+
+      context "with the default and named profiles" do
+        let(:string) do
+          <<-EOC
+            [default]
+            aws_access_key_id=DefaultAccessKey01
+
+            [testing]
+            aws_access_key_id=TestingAccessKey03
+          EOC
+        end
+        it { should eq [
+          [:profile,    "default"],
+          [:key_value,  "aws_access_key_id",  "DefaultAccessKey01"],
+          [:profile,    "testing"],
+          [:key_value,  "aws_access_key_id",  "TestingAccessKey03"],
+        ] }
+      end
+    end
   end
 
   describe "#build" do
@@ -67,7 +107,7 @@ aws_access_key_id=DefaultAccessKey01
     context "Single profile" do
       let(:tokens) { [
         [:profile,    "default"],
-        [:key_value,  "aws_access_key_id",      "DefaultAccessKey01"], 
+        [:key_value,  "aws_access_key_id",      "DefaultAccessKey01"],
         [:key_value,  "aws_secret_access_key",  "Default/Secret/Access/Key/02"],
         [:key_value,  "region",                 "us-west-1"]
       ] }
@@ -83,9 +123,9 @@ aws_access_key_id=DefaultAccessKey01
     context "Multi profiles" do
       let(:tokens) { [
         [:profile,    "default"],
-        [:key_value,  "aws_access_key_id",  "DefaultAccessKey01"], 
+        [:key_value,  "aws_access_key_id",  "DefaultAccessKey01"],
         [:profile,    "testing"],
-        [:key_value,  "aws_access_key_id",  "TestingAccessKey02"], 
+        [:key_value,  "aws_access_key_id",  "TestingAccessKey02"],
       ] }
       it { should eq({
         "default" => { "aws_access_key_id" => "DefaultAccessKey01" },
@@ -96,11 +136,11 @@ aws_access_key_id=DefaultAccessKey01
     context "Twice-defined single profile" do
       let(:tokens) { [
         [:profile,    "default"],
-        [:key_value,  "aws_access_key_id",      "DefaultAccessKey01"], 
+        [:key_value,  "aws_access_key_id",      "DefaultAccessKey01"],
         [:key_value,  "region",                 "us-west-1"],
         [:profile,    "default"],
-        [:key_value,  "aws_access_key_id",      "DefaultAccessKey01_ANOTHER"], 
-        [:key_value,  "aws_secret_access_key",  "Default/Secret/Access/Key/01"], 
+        [:key_value,  "aws_access_key_id",      "DefaultAccessKey01_ANOTHER"],
+        [:key_value,  "aws_secret_access_key",  "Default/Secret/Access/Key/01"],
       ] }
       it { should eq({
         "default" => {
