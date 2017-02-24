@@ -58,15 +58,8 @@ module AWSConfig
       }
     end
 
-    # Returns a new profile from the two merged profiles
-    def merge(profile)
-      merged = entries.dup
-      merged.merge! profile.entries
-      new name, merged
-    end
-
-    def merge!(profile)
-      entries.merge! profile.entries
+    def merge!(other)
+      @entries = Parser.from_hash(entries.merge(other.entries))
       self
     end
   end

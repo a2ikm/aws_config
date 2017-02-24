@@ -11,12 +11,73 @@ aws_access_key_id=DefaultAccessKey01
 aws_secret_access_key=Default/Secret/Access/Key/02
 region=us-west-1
       EOC
-      it { should eq [
-        [:profile,    "default"],
-        [:key_value,  "aws_access_key_id",      "DefaultAccessKey01"],
-        [:key_value,  "aws_secret_access_key",  "Default/Secret/Access/Key/02"],
-        [:key_value,  "region",                 "us-west-1"]
-      ] }
+      it { should eq({
+        "default" => {
+          "aws_access_key_id" => "DefaultAccessKey01",
+          "aws_secret_access_key" => "Default/Secret/Access/Key/02",
+          "region" => "us-west-1" }
+      }) }
+    end
+
+    context "with nesting" do
+      let(:string) { <<-EOC }
+[default]
+region=us-east-1
+s3=
+  max_concurrent_requests=100101
+  max_queue_size=20
+output=json
+      EOC
+      it { should eq({
+        "default" => {
+          "region" => "us-east-1",
+          "s3" => {
+            "max_concurrent_requests" => "100101",
+            "max_queue_size" => "20"
+          },
+          "output" => "json" }
+      }) }
+    end
+
+    context "invalid nesting" do
+      let(:string) { <<-EOC }
+[default]
+region=us-east-1
+s3=
+  max_concurrent_requests=100101
+output=json
+  max_queue_size=20
+      EOC
+      it "raises an exception" do
+        expect { subject }.to raise_error(RuntimeError, "Nesting without a parent error")
+      end
+    end
+
+    context "multiple nesting" do
+      let(:string) { <<-EOC }
+[default]
+region=us-east-1
+s3=
+  max_concurrent_requests=100101
+  max_queue_size=20
+output=json
+api_versions =
+    ec2 = 2015-03-01
+    cloudfront = 2015-09-17
+      EOC
+      it { should eq({
+        "default" => {
+          "region" => "us-east-1",
+          "s3" => {
+            "max_concurrent_requests" => "100101",
+            "max_queue_size" => "20"
+          },
+          "output" => "json",
+          "api_versions" => {
+            "ec2" => "2015-03-01",
+            "cloudfront" => "2015-09-17"
+          } }
+      }) }
     end
 
     context "default and named profiles" do
@@ -27,12 +88,10 @@ aws_access_key_id=DefaultAccessKey01
 [profile testing]
 aws_access_key_id=TestingAccessKey03
       EOC
-      it { should eq [
-        [:profile,    "default"],
-        [:key_value,  "aws_access_key_id",  "DefaultAccessKey01"],
-        [:profile,    "testing"],
-        [:key_value,  "aws_access_key_id",  "TestingAccessKey03"],
-      ] }
+      it { should eq({
+        "default" => { "aws_access_key_id" => "DefaultAccessKey01" },
+        "testing" => { "aws_access_key_id" => "TestingAccessKey03" }
+      })}
 
       context "Comment line" do
         let(:string) { <<-EOC }
@@ -40,10 +99,9 @@ aws_access_key_id=TestingAccessKey03
 # THIS IS COMMENT #
 aws_access_key_id=DefaultAccessKey01
         EOC
-        it { should eq [
-          [:profile,    "default"],
-          [:key_value,  "aws_access_key_id",  "DefaultAccessKey01"]
-        ] }
+        it { should eq({
+          "default" => { "aws_access_key_id" => "DefaultAccessKey01" }
+        }) }
       end
 
       context "Blank line" do
@@ -53,10 +111,9 @@ aws_access_key_id=DefaultAccessKey01
 
 aws_access_key_id=DefaultAccessKey01
         EOC
-        it { should eq [
-          [:profile,    "default"],
-          [:key_value,  "aws_access_key_id",  "DefaultAccessKey01"]
-        ] }
+        it { should eq({
+          "default" => { "aws_access_key_id" => "DefaultAccessKey01" }
+        }) }
       end
     end
 
@@ -67,108 +124,30 @@ aws_access_key_id=DefaultAccessKey01
         sut.send(:tokenize, string)
       end
       context "with only the default profile" do
-        let(:string) do
-          <<-EOC
-            [default]
-            aws_access_key_id=DefaultAccessKey01
-            aws_secret_access_key=Default/Secret/Access/Key/02
-          EOC
-        end
-        it { should eq [
-          [:profile,    "default"],
-          [:key_value,  "aws_access_key_id",      "DefaultAccessKey01"],
-          [:key_value,  "aws_secret_access_key",  "Default/Secret/Access/Key/02"],
-        ] }
+        let(:string) { <<-EOC }
+[default]
+aws_access_key_id=DefaultAccessKey01
+aws_secret_access_key=Default/Secret/Access/Key/02
+        EOC
+        it { should eq({
+          "default" => {
+            "aws_access_key_id" => "DefaultAccessKey01", "aws_secret_access_key" => "Default/Secret/Access/Key/02"
+           }
+        }) }
       end
 
       context "with the default and named profiles" do
-        let(:string) do
-          <<-EOC
-            [default]
-            aws_access_key_id=DefaultAccessKey01
+        let(:string) { <<-EOC }
+[default]
+aws_access_key_id=DefaultAccessKey01
 
-            [testing]
-            aws_access_key_id=TestingAccessKey03
-          EOC
-        end
-        it { should eq [
-          [:profile,    "default"],
-          [:key_value,  "aws_access_key_id",  "DefaultAccessKey01"],
-          [:profile,    "testing"],
-          [:key_value,  "aws_access_key_id",  "TestingAccessKey03"],
-        ] }
-      end
-    end
-  end
-
-  describe "#build" do
-    subject { described_class.new.send(:build, tokens) }
-
-    context "Single profile" do
-      let(:tokens) { [
-        [:profile,    "default"],
-        [:key_value,  "aws_access_key_id",      "DefaultAccessKey01"],
-        [:key_value,  "aws_secret_access_key",  "Default/Secret/Access/Key/02"],
-        [:key_value,  "region",                 "us-west-1"]
-      ] }
-      it { should eq({
-        "default" => {
-          "aws_access_key_id"     => "DefaultAccessKey01",
-          "aws_secret_access_key" => "Default/Secret/Access/Key/02",
-          "region"                => "us-west-1"
-        }
-      }) }
-    end
-
-    context "Multi profiles" do
-      let(:tokens) { [
-        [:profile,    "default"],
-        [:key_value,  "aws_access_key_id",  "DefaultAccessKey01"],
-        [:profile,    "testing"],
-        [:key_value,  "aws_access_key_id",  "TestingAccessKey02"],
-      ] }
-      it { should eq({
-        "default" => { "aws_access_key_id" => "DefaultAccessKey01" },
-        "testing" => { "aws_access_key_id" => "TestingAccessKey02" }
-      }) }
-    end
-
-    context "Twice-defined single profile" do
-      let(:tokens) { [
-        [:profile,    "default"],
-        [:key_value,  "aws_access_key_id",      "DefaultAccessKey01"],
-        [:key_value,  "region",                 "us-west-1"],
-        [:profile,    "default"],
-        [:key_value,  "aws_access_key_id",      "DefaultAccessKey01_ANOTHER"],
-        [:key_value,  "aws_secret_access_key",  "Default/Secret/Access/Key/01"],
-      ] }
-      it { should eq({
-        "default" => {
-          "aws_access_key_id"     => "DefaultAccessKey01_ANOTHER",
-          "aws_secret_access_key" => "Default/Secret/Access/Key/01",
-          "region"                => "us-west-1"
-        }
-      }) }
-    end
-  end
-
-  describe "#wrap" do
-    subject { described_class.new.send(:wrap, profiles) }
-
-    context "Single profile" do
-      let(:profiles) {
-        {
-          "default" => {
-            "aws_access_key_id"     => "DefaultAccessKey01",
-            "aws_secret_access_key" => "Default/Secret/Access/Key/02",
-            "region"                => "us-west-1"
-          }
-        }
-      }
-      it { should be_a Hash }
-      it { should have_key "default" }
-      it "should have AWSConfig::Profile as value" do
-        expect(subject["default"]).to be_a AWSConfig::Profile
+[testing]
+aws_access_key_id=TestingAccessKey03
+        EOC
+        it { should eq({
+          "default" => { "aws_access_key_id" => "DefaultAccessKey01" },
+          "testing" => { "aws_access_key_id" => "TestingAccessKey03" }
+        }) }
       end
     end
   end
