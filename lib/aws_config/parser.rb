@@ -27,7 +27,7 @@ module AWSConfig
       current_nesting = nil
 
       string.lines.each do |line|
-        comment = line.match(/\s*#.*/)
+        comment = line.match(/^\s*#.*/)
         blank = line.match(/^\s*$/)
         next if comment || blank
 

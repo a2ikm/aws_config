@@ -11,12 +11,12 @@ aws_access_key_id=DefaultAccessKey01
 aws_secret_access_key=Default/Secret/Access/Key/02
 region=us-west-1
       EOC
-      it { should eq({
+      it { should eq(
         "default" => {
           "aws_access_key_id" => "DefaultAccessKey01",
           "aws_secret_access_key" => "Default/Secret/Access/Key/02",
           "region" => "us-west-1" }
-      }) }
+      ) }
     end
 
     context "with nesting" do
@@ -28,7 +28,7 @@ s3=
   max_queue_size=20
 output=json
       EOC
-      it { should eq({
+      it { should eq(
         "default" => {
           "region" => "us-east-1",
           "s3" => {
@@ -36,7 +36,7 @@ output=json
             "max_queue_size" => "20"
           },
           "output" => "json" }
-      }) }
+      ) }
     end
 
     context "invalid nesting" do
@@ -65,7 +65,7 @@ api_versions =
     ec2 = 2015-03-01
     cloudfront = 2015-09-17
       EOC
-      it { should eq({
+      it { should eq(
         "default" => {
           "region" => "us-east-1",
           "s3" => {
@@ -76,8 +76,28 @@ api_versions =
           "api_versions" => {
             "ec2" => "2015-03-01",
             "cloudfront" => "2015-09-17"
-          } }
-      }) }
+          }
+        }
+      ) }
+    end
+
+    context "with comments" do
+      let(:string) { <<-EOC }
+[default] # inline comment in a profile
+region=us-east-1 # inline comment in top level element
+s3= # inline comment in nesting openning
+  max_concurrent_requests=100101 # inline comment in a nested element
+  # comment prefixed with spaces
+# comment in a new line
+      EOC
+      it { should eq(
+        "default" => {
+          "region" => "us-east-1",
+          "s3" => {
+            "max_concurrent_requests" => "100101",
+          }
+        }
+      ) }
     end
 
     context "default and named profiles" do
@@ -88,10 +108,10 @@ aws_access_key_id=DefaultAccessKey01
 [profile testing]
 aws_access_key_id=TestingAccessKey03
       EOC
-      it { should eq({
+      it { should eq(
         "default" => { "aws_access_key_id" => "DefaultAccessKey01" },
         "testing" => { "aws_access_key_id" => "TestingAccessKey03" }
-      })}
+      ) }
 
       context "Comment line" do
         let(:string) { <<-EOC }
@@ -99,9 +119,9 @@ aws_access_key_id=TestingAccessKey03
 # THIS IS COMMENT #
 aws_access_key_id=DefaultAccessKey01
         EOC
-        it { should eq({
+        it { should eq(
           "default" => { "aws_access_key_id" => "DefaultAccessKey01" }
-        }) }
+        ) }
       end
 
       context "Blank line" do
@@ -111,9 +131,9 @@ aws_access_key_id=DefaultAccessKey01
 
 aws_access_key_id=DefaultAccessKey01
         EOC
-        it { should eq({
+        it { should eq(
           "default" => { "aws_access_key_id" => "DefaultAccessKey01" }
-        }) }
+        ) }
       end
     end
 
@@ -129,11 +149,12 @@ aws_access_key_id=DefaultAccessKey01
 aws_access_key_id=DefaultAccessKey01
 aws_secret_access_key=Default/Secret/Access/Key/02
         EOC
-        it { should eq({
+        it { should eq(
           "default" => {
-            "aws_access_key_id" => "DefaultAccessKey01", "aws_secret_access_key" => "Default/Secret/Access/Key/02"
-           }
-        }) }
+            "aws_access_key_id" => "DefaultAccessKey01",
+            "aws_secret_access_key" => "Default/Secret/Access/Key/02"
+          }
+        ) }
       end
 
       context "with the default and named profiles" do
@@ -144,10 +165,10 @@ aws_access_key_id=DefaultAccessKey01
 [testing]
 aws_access_key_id=TestingAccessKey03
         EOC
-        it { should eq({
+        it { should eq(
           "default" => { "aws_access_key_id" => "DefaultAccessKey01" },
           "testing" => { "aws_access_key_id" => "TestingAccessKey03" }
-        }) }
+        ) }
       end
     end
   end
