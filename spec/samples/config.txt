@@ -2,7 +2,13 @@
 # Optional, to define default region for this profile.
 region=us-west-1
 source_profile=default
+# Nested
+s3=
+  max_concurrent_requests=100101
+  max_queue_size=20
+output=json
 
 [profile testing]
 region=us-west-2
 source_profile=testing
+

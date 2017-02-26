@@ -6,70 +6,58 @@ module AWSConfig
     attr_accessor :credential_file_mode
 
     def self.parse(string, credential_file_mode = false)
-      parser = new
-      parser.credential_file_mode = credential_file_mode
-      parser.parse(string)
+      from_hash(new.tokenize(string))
     end
 
-    def parse(string)
-      wrap(build(tokenize(string)))
+    def self.from_hash(hash)
+      hash.inject({}) do |memo, (k,v)|
+        if v.is_a?(Hash)
+          memo[k]=Profile.new(k,v)
+        else
+          memo[k] = v
+        end
+
+        memo
+      end
     end
 
-    private
+    def tokenize(string)
+      tokens = { }
+      current_profile = nil
+      current_nesting = nil
 
-      def tokenize(string)
-        s = StringScanner.new(string)
-        tokens  = []
+      string.lines.each do |line|
+        comment = line.match(/^\s*#.*/)
+        blank = line.match(/^\s*$/)
+        next if comment || blank
 
-        until s.eos?
-          if s.scan(/\[\s*([^\]]+)\s*\]/)
-            if s[1] == "default"
-              tokens << [:profile, "default"]
-            elsif m = s[1].match(/profile\s+([^\s]+)$/)
-              tokens << [:profile, m[1]]
-            elsif credential_file_mode
-              tokens << [:profile, s[1]]
-            end
-          elsif s.scan(/([^\s=#]+)\s*=\s*([^\s#]+)/)
-            tokens << [:key_value, s[1], s[2]]
-          elsif s.scan(/#[^\n]*/)
-          elsif s.scan(/\s+/)
-          elsif s.scan(/\n+/)
+        profile_match = line.match(/\[\s*(profile)?\s*(?<profile>[^\]]+)\s*\]/)
+        if profile_match
+          current_profile = profile_match[:profile]
+          tokens[current_profile] ||= {}
+          next
+        end
+
+        nest_key_value = line.match(/(?<nest>^\s+)?(?<key>[^\s=#]+)\s*=\s*(?<value>[^\s#]+)/)
+        if nest_key_value
+          nest, key, value = !!nest_key_value[:nest], nest_key_value[:key], nest_key_value[:value]
+          if nest
+            fail("Nesting without a parent error") if current_nesting.nil?
+            tokens[current_profile][current_nesting][key] = value
           else
-            s.scan(/./)
-            raise "Invalid token `#{s[0]}` as #{s.pos}"
+            current_nesting = nil
+            tokens[current_profile][key] = value
           end
+          next
         end
 
-        tokens
-      end
-
-      def build(tokens)
-        tokens = tokens.dup
-        profiles = {}
-        profile = nil
-
-        while values = tokens.shift
-          head = values.shift
-
-          case head
-          when :profile
-            profile = profiles[values[0]] ||= {}
-          when :key_value
-            if profile
-              profile[values[0]] = values[1]
-            end
-          end
-        end
-
-        profiles
-      end
-
-      def wrap(profiles)
-        profiles.inject({}) do |s, (name, properties)|
-          s[name] = Profile.new(name, properties)
-          s
+        nesting = line.match(/(?<name>[^\s=#]+)\s*=.*/)
+        if nesting
+          current_nesting = nesting[:name]
+          tokens[current_profile][current_nesting] ||= {}
         end
       end
+      tokens
+    end
   end
 end
