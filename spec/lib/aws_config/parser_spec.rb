@@ -137,12 +137,7 @@ aws_access_key_id=DefaultAccessKey01
       end
     end
 
-    context "in credential file mode" do
-      subject do
-        sut = described_class.new
-        sut.credential_file_mode = true
-        sut.send(:tokenize, string)
-      end
+    context "credential file" do
       context "with only the default profile" do
         let(:string) { <<-EOC }
 [default]
