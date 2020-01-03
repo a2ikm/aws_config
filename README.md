@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/a2ikm/aws_config.svg?branch=master)](https://travis-ci.org/a2ikm/aws_config)
+
 # AWSConfig
 
 AWSConfig is a parser for AWS_CONFIG_FILE used in [aws-cli](https://github.com/aws/aws-cli).
