@@ -1,43 +1,26 @@
-require "aws_config/profile"
-
 module AWSConfig
   class ProfileResolver
-    attr_reader :profiles, :wanted_profiles
+    attr_reader :profiles
 
     def initialize
       @profiles = {}
-      @wanted_profiles = {}
     end
 
-    def add(profs)
-      profs.each do |name, profile|
-        if profiles.key? name
-          profiles[name].merge! profile
-        else
-          profiles[name] = profile
-        end
-        resolve_source_profile(name, profile) if profile.has_key? "source_profile"
-        provides_source_profile(name, profile)
+    def add(profiles_hash)
+      profiles.merge!(profiles_hash) do |_, original, added|
+        original.merge!(added)
       end
+
+      populate_sourced_data!
     end
 
     private
 
-    def resolve_source_profile(name, profile)
-      source_profile = profile.source_profile
-      if profiles.key? source_profile
-        profile["source_profile"] = profiles[source_profile]
-      else
-        (wanted_profiles[source_profile] ||= []) << name
+    def populate_sourced_data!
+      profiles.each do |name, profile|
+        sourced = profiles[profile["source_profile"]]
+        profile["sourced_data"] = (sourced || {})
       end
-    end
-
-    def provides_source_profile(name, profile)
-      return unless wanted_profiles.key? name
-      wanted_profiles[name].each do |wanted_by|
-        profiles[wanted_by]["source_profile"] = profile
-      end
-      wanted_profiles.delete name
     end
   end
 end

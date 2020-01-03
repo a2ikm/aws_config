@@ -1,63 +1,46 @@
-require "strscan"
-require "aws_config/profile"
+require "aws_config/config_entry"
 
 module AWSConfig
   class Parser
-    attr_accessor :credential_file_mode
+    PROFILE_MATCH = /\[\s*(profile)?\s*(?<profile>[^\]]+)\s*\]/
+    KEY_VALUE_MATCH = /^(?<key>[^\s=#]+)\s*=\s*(?<value>[^\s#]+)/
+    NESTED_KEY_VALUE_MATCH = /^(?<nesting>\s+)(?<key>[^\s=#]+)\s*=\s*(?<value>[^\s#]+)/
+    OPEN_NESTING_MATCH = /(?<name>[^\s=#]+)\s*=.*/
 
-    def self.parse(string, credential_file_mode = false)
+    def self.parse(string)
       from_hash(new.tokenize(string))
     end
 
     def self.from_hash(hash)
       hash.inject({}) do |memo, (k,v)|
-        if v.is_a?(Hash)
-          memo[k]=Profile.new(k,v)
-        else
-          memo[k] = v
-        end
-
+        v = ConfigEntry.new(v) if v.is_a?(Hash)
+        memo[k] = v
         memo
       end
     end
 
     def tokenize(string)
-      tokens = { }
       current_profile = nil
       current_nesting = nil
 
-      string.lines.each do |line|
-        comment = line.match(/^\s*#.*/)
-        blank = line.match(/^\s*$/)
-        next if comment || blank
-
-        profile_match = line.match(/\[\s*(profile)?\s*(?<profile>[^\]]+)\s*\]/)
-        if profile_match
-          current_profile = profile_match[:profile]
+      string.lines.inject({}) do |tokens, line|
+        case line
+        when PROFILE_MATCH
+          current_profile = $~[:profile]
           tokens[current_profile] ||= {}
-          next
-        end
-
-        nest_key_value = line.match(/(?<nest>^\s+)?(?<key>[^\s=#]+)\s*=\s*(?<value>[^\s#]+)/)
-        if nest_key_value
-          nest, key, value = !!nest_key_value[:nest], nest_key_value[:key], nest_key_value[:value]
-          if nest
-            fail("Nesting without a parent error") if current_nesting.nil?
-            tokens[current_profile][current_nesting][key] = value
-          else
-            current_nesting = nil
-            tokens[current_profile][key] = value
-          end
-          next
-        end
-
-        nesting = line.match(/(?<name>[^\s=#]+)\s*=.*/)
-        if nesting
-          current_nesting = nesting[:name]
+        when KEY_VALUE_MATCH
+          current_nesting, key, value = nil, $~[:key], $~[:value]
+          tokens[current_profile][key] = value
+        when NESTED_KEY_VALUE_MATCH
+          fail("Nesting without a parent error") if current_nesting.nil?
+          key, value = $~[:key], $~[:value]
+          tokens[current_profile][current_nesting][key] = value
+        when OPEN_NESTING_MATCH
+          current_nesting = $~[:name]
           tokens[current_profile][current_nesting] ||= {}
         end
+        tokens
       end
-      tokens
     end
   end
 end

@@ -1,5 +1,6 @@
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
 require "aws_config"
+require "pry"
 
 RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
