@@ -3,7 +3,7 @@ module AWSConfig
   module Store
     def profiles
       @profiles ||= begin
-        if File.exists?(config_file)
+        if File.exist?(config_file)
           profile_resolver = ProfileResolver.new
           profile_resolver.add Parser.parse(File.read(credentials_file), true)
           profile_resolver.add Parser.parse(File.read(config_file))
