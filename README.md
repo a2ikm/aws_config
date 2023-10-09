@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/a2ikm/aws_config.svg?branch=master)](https://travis-ci.org/a2ikm/aws_config)
+[![Build Status](https://github.com/a2ikm/aws_config/actions/workflows/test.yml/badge.svg)](https://github.com/a2ikm/aws_config/actions)
 
 # AWSConfig
 
